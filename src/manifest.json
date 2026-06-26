@@ -1,0 +1,41 @@
+{
+  "manifest_version": 3,
+  "name": "Interview Prep Assistant",
+  "version": "1.0.0",
+  "description": "AI-powered interview preparation from job descriptions",
+  "permissions": ["storage", "activeTab", "scripting", "downloads"],
+  "host_permissions": [
+    "https://www.linkedin.com/*",
+    "https://www.indeed.com/*",
+    "https://www.glassdoor.com/*",
+    "https://careers.google.com/*",
+    "https://careers.apple.com/*"
+  ],
+  "action": {
+    "default_popup": "src/popup/popup.html",
+    "default_title": "Interview Prep"
+  },
+  "options_page": "src/options/options.html",
+  "background": {
+    "service_worker": "src/background/service-worker.ts",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.linkedin.com/*",
+        "https://www.indeed.com/*",
+        "https://www.glassdoor.com/*",
+        "https://careers.google.com/*",
+        "https://careers.apple.com/*"
+      ],
+      "js": ["src/content/content-script.ts"],
+      "run_at": "document_end"
+    }
+  ],
+  "icons": {
+    "16": "assets/icon-16.png",
+    "48": "assets/icon-48.png",
+    "128": "assets/icon-128.png"
+  }
+}
