@@ -2,6 +2,8 @@ import type { ExtensionMessage } from '@/shared/types';
 import { MessageType } from '@/shared/types';
 import { generateMarkdownExport } from '@/shared/utils/markdown-export';
 import { StorageManager } from '@/shared/utils/storage-manager';
+import { openAnalyzeTabInBackground, openSidePanelInBackground } from '../side-panel';
+import { extractJobFromUrl } from './url-extract-handler';
 import { ApiHandler } from './api-handler';
 import { StorageHandler } from './storage-handler';
 
@@ -59,6 +61,19 @@ export class MessageHandler {
 
       case MessageType.EXPORT_MARKDOWN:
         return this.handleExportMarkdown(message.payload as string);
+
+      case MessageType.OPEN_SIDE_PANEL: {
+        const windowId = (message.payload as { windowId?: number } | null)?.windowId;
+        await openSidePanelInBackground(windowId);
+        return { success: true };
+      }
+
+      case MessageType.OPEN_ANALYZE_TAB:
+        await openAnalyzeTabInBackground();
+        return { success: true };
+
+      case MessageType.EXTRACT_JOB_FROM_URL:
+        return extractJobFromUrl(message.payload as string);
 
       default:
         throw new Error(`Unknown message type: ${message.type}`);

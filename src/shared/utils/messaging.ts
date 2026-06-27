@@ -6,13 +6,36 @@ import type {
   JobDescription,
 } from '@/shared/types';
 import { MessageType } from '@/shared/types';
+import { extractJobFromTabId } from '@/shared/utils/tab-extractor';
+import { isSupportedJobHost } from '@/shared/utils/job-url';
 
 async function sendMessage<T>(message: ExtensionMessage): Promise<T> {
-  const response = await chrome.runtime.sendMessage(message);
-  if (response?.error) {
+  let response: { data?: T; error?: string } | undefined;
+
+  try {
+    response = await chrome.runtime.sendMessage(message);
+  } catch (error) {
+    const messageText = error instanceof Error ? error.message : String(error);
+    if (messageText.includes('Receiving end does not exist')) {
+      throw new Error(
+        'Extension background is not ready. Reload the extension at chrome://extensions and try again.',
+        { cause: error }
+      );
+    }
+    throw error;
+  }
+
+  if (!response) {
+    throw new Error(
+      'No response from extension background. Reload the extension at chrome://extensions and try again.'
+    );
+  }
+
+  if (response.error) {
     throw new Error(response.error);
   }
-  return response?.data as T;
+
+  return response.data as T;
 }
 
 export async function saveJob(job: JobDescription): Promise<void> {
@@ -100,16 +123,15 @@ export async function exportMarkdown(jobId: string): Promise<void> {
 }
 
 export async function extractJobFromTab(tabId: number): Promise<JobDescription> {
-  const response = await chrome.tabs.sendMessage(tabId, {
-    type: 'EXTRACT_JOB',
+  return extractJobFromTabId(tabId);
+}
+
+export async function extractJobFromUrl(url: string): Promise<JobDescription> {
+  return sendMessage<JobDescription>({
+    type: MessageType.EXTRACT_JOB_FROM_URL,
+    payload: url,
     timestamp: Date.now(),
   });
-
-  if (!response?.success || !response.job) {
-    throw new Error(response?.error || 'Failed to extract job description');
-  }
-
-  return response.job;
 }
 
 export async function isSupportedJobTab(): Promise<boolean> {
@@ -118,15 +140,27 @@ export async function isSupportedJobTab(): Promise<boolean> {
 
   try {
     const url = new URL(tab.url);
-    const host = url.hostname.toLowerCase();
-    return (
-      host.includes('linkedin.com') ||
-      host.includes('indeed.com') ||
-      host.includes('glassdoor.com') ||
-      host.includes('careers.google.com') ||
-      host.includes('careers.apple.com')
-    );
+    return isSupportedJobHost(url.hostname);
   } catch {
     return false;
   }
 }
+
+export async function openSidePanel(): Promise<void> {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  await sendMessage({
+    type: MessageType.OPEN_SIDE_PANEL,
+    payload: { windowId: tab?.windowId },
+    timestamp: Date.now(),
+  });
+}
+
+export async function openAnalyzeTab(): Promise<void> {
+  await sendMessage({
+    type: MessageType.OPEN_ANALYZE_TAB,
+    payload: null,
+    timestamp: Date.now(),
+  });
+}
+
+export { isSupportedJobUrl } from '@/shared/utils/job-url';

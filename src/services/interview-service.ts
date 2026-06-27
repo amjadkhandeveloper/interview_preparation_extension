@@ -5,6 +5,7 @@ import type {
   JobDescription,
   TechnicalTopic,
 } from '@/shared/types';
+import { MAX_PROMPT_DESCRIPTION_LENGTH } from '@/shared/constants';
 import { Logger } from '@/shared/utils/logger';
 import {
   validateBehavioralQuestions,
@@ -14,7 +15,7 @@ import {
   validateSalaryInsight,
   validateTechnicalTopics,
 } from '@/shared/utils/validator';
-import { ApiClient } from './api-client';
+import { ApiClient, ApiError } from './api-client';
 import { CacheManager } from './cache-manager';
 
 export class InterviewService {
@@ -58,8 +59,22 @@ export class InterviewService {
       };
     } catch (error) {
       this.logger.error('Failed to generate interview prep', error);
-      throw new InterviewPrepError('Interview prep generation failed', error);
+      throw new InterviewPrepError(formatPrepError(error), error);
     }
+  }
+
+  private jobContext(job: JobDescription): string {
+    const description = job.description.slice(0, MAX_PROMPT_DESCRIPTION_LENGTH);
+    return `Job Title: ${job.title}
+Company: ${job.company}
+Skills: ${job.skills.join(', ') || 'See description below'}
+Requirements:
+${job.requirements.join('\n') || 'See description below'}
+Responsibilities:
+${job.responsibilities.join('\n') || 'See description below'}
+
+Full Job Description:
+${description}`;
   }
 
   private async generateConsolidated(job: JobDescription): Promise<InterviewPrep> {
@@ -72,11 +87,7 @@ export class InterviewService {
 
     const prompt = `Analyze this job and return a complete interview prep plan as JSON.
 
-Job Title: ${job.title}
-Company: ${job.company}
-Skills: ${job.skills.join(', ')}
-Requirements: ${job.requirements.join('\n')}
-Responsibilities: ${job.responsibilities.join('\n')}
+${this.jobContext(job)}
 
 Return JSON with structure:
 {
@@ -111,9 +122,7 @@ Return JSON with structure:
 
     const prompt = `Analyze this job posting and identify key technical topics for interview preparation.
 
-Job Title: ${job.title}
-Skills: ${job.skills.join(', ')}
-Requirements: ${job.requirements.join('\n')}
+${this.jobContext(job)}
 
 Return JSON array only:
 [{"topic": string, "difficulty": "Beginner|Intermediate|Advanced", "keyPoints": string[], "estimatedPrep": number}]`;
@@ -137,8 +146,7 @@ Return JSON array only:
 
     const prompt = `Generate 5 behavioral interview questions for this role.
 
-Job Title: ${job.title}
-Responsibilities: ${job.responsibilities.join('\n')}
+${this.jobContext(job)}
 
 Return JSON array only:
 [{"question": string, "category": "Leadership|Teamwork|Conflict|Problem-Solving|Growth", "suggestedApproach": string, "starExamples": string[]}]`;
@@ -233,4 +241,29 @@ export class InterviewPrepError extends Error {
     this.name = 'InterviewPrepError';
     this.originalError = originalError;
   }
+}
+
+function formatPrepError(error: unknown): string {
+  if (error instanceof ApiError) {
+    try {
+      const body = JSON.parse(error.responseBody) as {
+        error?: { message?: string };
+        message?: string;
+      };
+      const detail = body.error?.message || body.message;
+      if (detail) return `AI API error (${error.statusCode}): ${detail}`;
+    } catch {
+      // use raw body below
+    }
+    return `AI API error (${error.statusCode}): ${error.responseBody.slice(0, 200)}`;
+  }
+
+  if (error instanceof Error) {
+    if (error.name === 'AbortError' || error.message.includes('aborted')) {
+      return 'Request timed out. Try enabling "Use consolidated prompt" in Settings.';
+    }
+    return error.message;
+  }
+
+  return 'Interview prep generation failed';
 }

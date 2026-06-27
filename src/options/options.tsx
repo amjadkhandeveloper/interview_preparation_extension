@@ -1,6 +1,6 @@
-import { createRoot } from 'react-dom/client';
 import '@/styles/index.css';
 import { Settings } from '@/popup/components/Settings';
+import { renderRoot } from '@/shared/utils/render-root';
 
 function OptionsPage() {
   return (
@@ -15,7 +15,4 @@ function OptionsPage() {
   );
 }
 
-const root = document.getElementById('root');
-if (root) {
-  createRoot(root).render(<OptionsPage />);
-}
+renderRoot(<OptionsPage />);

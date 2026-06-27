@@ -1,5 +1,6 @@
-import { MAX_DESCRIPTION_LENGTH, SKILL_KEYWORDS } from '@/shared/constants';
+import { MAX_DESCRIPTION_LENGTH } from '@/shared/constants';
 import type { JobDescription, JobPlatform } from '@/shared/types';
+import { buildJobDescription } from '@/shared/utils/job-parser';
 import { PlatformDetector } from './platform-detector';
 
 export class JobExtractor {
@@ -130,53 +131,13 @@ export class JobExtractor {
       return null;
     }
 
-    const trimmedDescription = description.trim().slice(0, MAX_DESCRIPTION_LENGTH);
-
-    return {
-      id: this.generateId(),
-      title: title.trim(),
-      company: company?.trim() || 'Unknown',
-      description: trimmedDescription,
+    return buildJobDescription({
+      title,
+      company: company || 'Unknown',
+      description: description.trim().slice(0, MAX_DESCRIPTION_LENGTH),
       url: window.location.href,
       platform,
-      extractedAt: Date.now(),
-      skills: this.extractSkills(trimmedDescription),
-      responsibilities: this.extractResponsibilities(trimmedDescription),
-      requirements: this.extractRequirements(trimmedDescription),
-    };
-  }
-
-  private static extractSkills(text: string): string[] {
-    const foundSkills = new Set<string>();
-    const lowerText = text.toLowerCase();
-
-    for (const skill of SKILL_KEYWORDS) {
-      if (new RegExp(`\\b${skill.replace(/[.+]/g, '\\$&').toLowerCase()}\\b`, 'i').test(lowerText)) {
-        foundSkills.add(skill);
-      }
-    }
-
-    return Array.from(foundSkills).sort();
-  }
-
-  private static extractResponsibilities(text: string): string[] {
-    const lines = text.split('\n').filter((line) => line.trim().length > 20);
-    return lines
-      .filter((line) => /^[-•*]|^(\d+\.)/.test(line.trim()))
-      .map((line) => line.replace(/^[-•*\d.]+\s*/, '').trim())
-      .slice(0, 10);
-  }
-
-  private static extractRequirements(text: string): string[] {
-    const requirementSection = text.split(/requirements|qualifications|must have|desired|prefer/i)[1];
-
-    if (!requirementSection) return [];
-
-    return requirementSection
-      .split('\n')
-      .filter((line) => /^[-•*]|^(\d+\.)/.test(line.trim()))
-      .map((line) => line.replace(/^[-•*\d.]+\s*/, '').trim())
-      .slice(0, 10);
+    });
   }
 
   private static findTextBySelectors(selectors: string[]): string | null {
@@ -199,9 +160,5 @@ export class JobExtractor {
       if (value) return value;
     }
     return null;
-  }
-
-  private static generateId(): string {
-    return `job_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
   }
 }

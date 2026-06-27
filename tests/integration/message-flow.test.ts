@@ -11,7 +11,7 @@ describe('MessageHandler integration', () => {
       timestamp: Date.now(),
     });
 
-    expect(result).toEqual({ provider: 'OpenAI', useConsolidatedPrompt: false });
+    expect(result).toEqual({ provider: 'OpenAI', useConsolidatedPrompt: true });
   });
 
   it('should throw for unknown message type', async () => {

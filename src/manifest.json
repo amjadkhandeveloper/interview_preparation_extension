@@ -3,17 +3,25 @@
   "name": "Interview Prep Assistant",
   "version": "1.0.0",
   "description": "AI-powered interview preparation from job descriptions",
-  "permissions": ["storage", "activeTab", "scripting", "downloads"],
+  "permissions": ["storage", "activeTab", "scripting", "downloads", "sidePanel", "tabs"],
   "host_permissions": [
-    "https://www.linkedin.com/*",
-    "https://www.indeed.com/*",
-    "https://www.glassdoor.com/*",
+    "https://*.linkedin.com/*",
+    "https://linkedin.com/*",
+    "https://*.indeed.com/*",
+    "https://indeed.com/*",
+    "https://*.glassdoor.com/*",
+    "https://glassdoor.com/*",
     "https://careers.google.com/*",
-    "https://careers.apple.com/*"
+    "https://careers.apple.com/*",
+    "https://api.openai.com/*",
+    "https://api.anthropic.com/*",
+    "https://generativelanguage.googleapis.com/*"
   ],
   "action": {
-    "default_popup": "src/popup/popup.html",
-    "default_title": "Interview Prep"
+    "default_title": "Interview Prep — Open Side Panel"
+  },
+  "side_panel": {
+    "default_path": "src/sidepanel/sidepanel.html"
   },
   "options_page": "src/options/options.html",
   "background": {
@@ -23,9 +31,12 @@
   "content_scripts": [
     {
       "matches": [
-        "https://www.linkedin.com/*",
-        "https://www.indeed.com/*",
-        "https://www.glassdoor.com/*",
+        "https://*.linkedin.com/*",
+        "https://linkedin.com/*",
+        "https://*.indeed.com/*",
+        "https://indeed.com/*",
+        "https://*.glassdoor.com/*",
+        "https://glassdoor.com/*",
         "https://careers.google.com/*",
         "https://careers.apple.com/*"
       ],

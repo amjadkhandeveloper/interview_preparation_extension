@@ -14,9 +14,15 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        popup: resolve(__dirname, 'src/popup/popup.html'),
-        options: resolve(__dirname, 'src/options/options.html'),
+        analyze: resolve(__dirname, 'src/analyze/analyze.html'),
       },
+    },
+  },
+  server: {
+    port: 5173,
+    strictPort: false,
+    hmr: {
+      port: 5173,
     },
   },
 });

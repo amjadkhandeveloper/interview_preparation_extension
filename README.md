@@ -14,18 +14,28 @@ AI-powered Chrome extension (Manifest V3) that extracts job descriptions from Li
 
 ```bash
 npm install
-npm run dev      # Start Vite dev server with HMR
+npm run dev      # Start Vite + CRXJS dev server (rebuilds dist/ with HMR)
 npm run build    # Production build to dist/
 npm run test     # Run Vitest tests
 npm run lint     # ESLint
+npm run typecheck
 ```
 
-## Load in Chrome
+## Load in Chrome (development)
 
-1. Run `npm run build`
+1. Run `npm run dev` and **keep the terminal open**
 2. Open `chrome://extensions`
 3. Enable **Developer mode**
-4. Click **Load unpacked** and select the `dist/` folder
+4. Click **Load unpacked** and select the `dist/` folder (created/updated by the dev server)
+5. Click the extension icon to open the **side panel**
+6. Configure your API key under **Settings** before analyzing
+
+Code changes rebuild automatically. If something stops working, click **Reload** on the extension card at `chrome://extensions`.
+
+## Load in Chrome (production)
+
+1. Run `npm run build`
+2. Load the `dist/` folder as an unpacked extension (same steps as above)
 
 ## Configuration
 

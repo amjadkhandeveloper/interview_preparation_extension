@@ -29,7 +29,7 @@ export function isValidAiProvider(value: string): value is AiProvider {
 export function validateSettings(value: unknown): ExtensionSettings {
   const defaults: ExtensionSettings = {
     provider: 'OpenAI',
-    useConsolidatedPrompt: false,
+    useConsolidatedPrompt: true,
   };
 
   if (!value || typeof value !== 'object') return defaults;

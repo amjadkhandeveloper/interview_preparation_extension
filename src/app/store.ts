@@ -30,7 +30,7 @@ export const useAppStore = create<AppState>((set) => ({
   currentJob: null,
   prepMaterials: null,
   history: [],
-  settings: { provider: 'OpenAI', useConsolidatedPrompt: false },
+  settings: { provider: 'OpenAI', useConsolidatedPrompt: true },
   isSupportedTab: false,
   credentialsConfigured: false,
 

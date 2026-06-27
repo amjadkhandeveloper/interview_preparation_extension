@@ -1,4 +1,5 @@
 import type { JobPlatform } from '@/shared/types';
+import { SUPPORTED_JOB_HOSTS } from '@/shared/constants';
 
 export class PlatformDetector {
   static detect(): JobPlatform {
@@ -11,13 +12,9 @@ export class PlatformDetector {
   }
 
   static isSupportedHost(hostname: string): boolean {
-    const lower = hostname.toLowerCase();
-    return (
-      lower.includes('linkedin.com') ||
-      lower.includes('indeed.com') ||
-      lower.includes('glassdoor.com') ||
-      lower.includes('careers.google.com') ||
-      lower.includes('careers.apple.com')
+    const host = hostname.toLowerCase();
+    return SUPPORTED_JOB_HOSTS.some(
+      (supported) => host === supported || host.endsWith(`.${supported}`)
     );
   }
 }

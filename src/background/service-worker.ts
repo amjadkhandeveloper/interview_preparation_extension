@@ -1,7 +1,10 @@
 import type { ExtensionMessage } from '@/shared/types';
 import { MessageHandler } from './handlers/message-handler';
+import { registerSidePanelListeners } from './side-panel';
 
 const messageHandler = new MessageHandler();
+
+registerSidePanelListeners();
 
 chrome.runtime.onInstalled.addListener((details) => {
   if (details.reason === 'install') {

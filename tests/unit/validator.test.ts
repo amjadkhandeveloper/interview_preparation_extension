@@ -43,6 +43,6 @@ describe('validator', () => {
   it('should return default settings for invalid input', () => {
     const settings = validateSettings(null);
     expect(settings.provider).toBe('OpenAI');
-    expect(settings.useConsolidatedPrompt).toBe(false);
+    expect(settings.useConsolidatedPrompt).toBe(true);
   });
 });

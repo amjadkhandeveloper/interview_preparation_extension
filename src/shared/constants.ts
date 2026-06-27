@@ -15,7 +15,8 @@ export const MAX_DESCRIPTION_LENGTH = 50_000;
 export const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 export const API_MAX_RETRIES = 3;
-export const API_TIMEOUT_MS = 30_000;
+export const API_TIMEOUT_MS = 90_000;
+export const MAX_PROMPT_DESCRIPTION_LENGTH = 12_000;
 
 export const API_ENDPOINTS = {
   OPENAI: 'https://api.openai.com/v1/chat/completions',
@@ -40,6 +41,7 @@ export const SKILL_KEYWORDS = [
   'Vue',
   'Angular',
   'Flutter',
+  'Dart',
   'Jetpack',
   'AWS',
   'GCP',

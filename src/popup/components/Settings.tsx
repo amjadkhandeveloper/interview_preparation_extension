@@ -15,7 +15,7 @@ interface SettingsProps {
 export function Settings({ compact = false }: SettingsProps) {
   const [settings, setSettings] = useState<ExtensionSettings>({
     provider: 'OpenAI',
-    useConsolidatedPrompt: false,
+    useConsolidatedPrompt: true,
   });
   const [apiKey, setApiKey] = useState('');
   const [passphrase, setPassphrase] = useState('');
